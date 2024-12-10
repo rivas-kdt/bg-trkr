@@ -1,4 +1,5 @@
 "use client";
+import axios from 'axios';
 import {
   Card,
   CardBody,
@@ -22,7 +23,7 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { Line } from "react-chartjs-2";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Modal,
   ModalBody,
@@ -134,12 +135,33 @@ export default function Dashboard() {
 
   const [selectedOption, setSelectedOption] = useState(null);
 
-  const options = [
-    { label: "Option 1", value: "1" },
-    { label: "Option 2", value: "2" },
-    { label: "Option 3", value: "3" },
-    { label: "Option 4", value: "4" },
-  ];
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Fetch data when the component mounts
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('https://vercel-postgres-try.vercel.app/api/try/exp_cat');
+        
+        // Set the fetched data in the state
+        setData(response.data);
+      } catch (err) {
+        // Set error state if there's an issue
+        setError(err.message);
+      }
+    };
+
+    fetchData(); // Call the fetch function
+
+  }, []);
+  
+  console.log(selectedOption)
+
+  const options = data.map(item => ({
+    label: item.cat_name,
+    value: item.id,
+  }));
 
   const handleSelection = (option) => {
     setSelectedOption(option);
